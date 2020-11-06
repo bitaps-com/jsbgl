@@ -9,7 +9,7 @@ const jsbtc_web = {
     node: {
         fs: 'empty'
     },
-    entry: './src/jsbtc.js',
+    entry: './src/jsbgl.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'jsbtc.js',

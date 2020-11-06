@@ -1,6 +1,6 @@
 var browser = true;
 try {
-    var jsbtc = require('../src/jsbtc.js');
+    var jsbtc = require('../src/jsbgl.js');
     var chai = require('chai');
     chai.use(require("chai-as-promised"));
     browser = false;
@@ -86,6 +86,15 @@ describe(`${(browser) ? 'Browser' : 'Node'} test jsbtc library`, function () {
             equal(Buffer.from("b720061a734285a70e86cb32b31f32884e198c32", 'hex').equals(hash160("746573742068617368313630")), true);
             equal(Buffer.from("b720061a734285a70e86cb32b31f32884e198c32", 'hex').equals(hash160("146573742068617368313630")), false);
         });
+
+        it('sha3', () => {
+            // equal(hash160("test sha3", {hex: true}), "b720061a734285a70e86cb32b31f32884e198c32");
+            // equal(hash160("746573742068617368313630", {hex: true}), "b720061a734285a70e86cb32b31f32884e198c32");
+            equal(sha3(Buffer.from("0000002040dee9142842cfd14796055fc8f16e48454b31e1c1f34c69be4834f40b000000f2e8d5499863e98272006d82dab93645902a255b279b0e98add955f66b5b9b3cc7f1195e82670f1d9bc3ab00", 'hex')).hex(),
+                s2rh("0000000b1ab864338f2ac7fd9d6b833be3a113031f09c30e9c944c161635e0db").hex());
+            // equal(Buffer.from("b720061a734285a70e86cb32b31f32884e198c32", 'hex').equals(hash160("146573742068617368313630")), false);
+        });
+
         it('hmac sha512', () => {
             equal(hmacSha512("super key", "super data", {hex: true}),
                 "8ec43ebe20084b72849eaca74d0dff44cb8db418944a25887673dc22ef8dd52d46ca56739d3d35e841" +

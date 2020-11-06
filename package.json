@@ -1,31 +1,31 @@
 {
-  "name": "jsbtc.js",
-  "version": "v1.0.17",
-  "description": "JavaScript Bitcoin library",
-  "main": "dist/jsbtc.js",
+  "name": "jsbgl",
+  "version": "1.0.17",
+  "description": "JavaScript Bitgesell library",
+  "main": "dist/jsbgl.js",
   "scripts": {
     "build:wasm:prebuild": "docker  build  -f ./Dockerfile.wasm -t wasm-builder .",
     "build:wasm:prebuild:no-cache": "docker  build --no-cache -f ./Dockerfile.wasm -t wasm-builder .",
     "build:wasm:pre": "docker  build  -f ./Dockerfile.wasm -t wasm-builder .",
-    "build:wasm": "docker run --rm --name wasm-builder -v $(pwd)/:/jsbtc/ -it wasm-builder /jsbtc/build.wasm.sh",
+    "build:wasm": "docker run --rm --name wasm-builder -v $(pwd)/:/jsbgl/ -it wasm-builder /jsbgl/build.wasm.sh",
     "commit": "git-cz",
     "check-coverage": "nyc check-coverage  --statements 70 --branches 70 --functions 80 --lines 90 ",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
     "watch:test": "npm t -- -w",
-    "test": "mocha test/jsbtc.test.js --require @babel/register ",
+    "test": "mocha test/jsbgl.test.js --require @babel/register ",
     "cover": "nyc npm t ",
     "cover:report": "nyc report --reporter=lcov --reporter=text",
     "prebuild": "rimraf dist",
     "build": "babel --copy-files -d dist --ignore *.test.js src",
-    "build:web": "npm run prebuild;webpack --output-filename jsbtc.web.min.js ",
+    "build:web": "npm run prebuild;webpack --output-filename jsbgl.web.min.js ",
     "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitaps-com/jsbtc.git"
+    "url": "git+https://github.com/bitaps-com/jsbgl.git"
   },
   "nyc": {
-  "exclude": "src/btc_crypto.js"
+    "exclude": "src/btc_crypto.js"
   },
   "keywords": [
     "bitcoin",
@@ -46,9 +46,9 @@
   "author": "Aleksey Karpov <admin@bitaps.com> (https://bitaps.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bitaps-com/jsbtc/issues"
+    "url": "https://github.com/bitaps-com/jsbgl/issues"
   },
-  "homepage": "https://github.com/bitaps-com/jsbtc#readme",
+  "homepage": "https://github.com/bitaps-com/jsbgl#readme",
   "devDependencies": {
     "@babel/cli": "7.8.4",
     "@babel/compat-data": "7.8.0",
@@ -90,5 +90,9 @@
     "commitizen": {
       "path": "node_modules/cz-conventional-changelog"
     }
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
   }
 }
