@@ -116,6 +116,21 @@ module.exports = function (S) {
         return (A.hex) ? out.hex() : out;
     };
 
+    S.sha3 = (m, A = {}) => {
+        ARGS(A, {encoding: 'hex|utf8', hex: false});
+        m = getBuffer(m, A.encoding);
+        let bP = malloc(m.length);
+        let oP = malloc(32);
+        CM.HEAPU8.set(m, bP);
+        CM._sha3(bP, m.length, oP);
+        let out = new BA(32);
+        for (let i = 0; i < 32; i++) out[i] = getValue(oP + i, 'i8');
+        free(bP);
+        free(oP);
+        return (A.hex) ? out.hex() : out;
+    };
+
+
     S.hash160 = (m, A = {}) => {
         ARGS(A, {encoding: 'hex|utf8', hex: false});
         return S.ripemd160(S.sha256(m, {hex: false, encoding: A.encoding}), {hex: A.hex});
