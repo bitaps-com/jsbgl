@@ -1,0 +1,295 @@
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+module.exports = function (S) {
+  var Buffer = S.Buffer;
+  var defArgs = S.defArgs;
+  var getBuffer = S.getBuffer;
+  var BF = Buffer.from;
+  var BC = Buffer.concat;
+  var O = S.OPCODE;
+
+  var PrivateKey = function PrivateKey(k) {
+    var A = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    (0, _classCallCheck2["default"])(this, PrivateKey);
+    defArgs(A, {
+      compressed: null,
+      testnet: false
+    });
+
+    if (k === undefined) {
+      if (A.compressed === null) A.compressed = true;
+      this.compressed = A.compressed;
+      this.testnet = A.testnet;
+      this.key = S.createPrivateKey({
+        wif: false
+      });
+      this.hex = this.key.hex();
+      this.wif = S.privateKeyToWif(this.key, A);
+    } else {
+      if (S.isString(k)) {
+        if (S.isHex(k)) {
+          if (A.compressed === null) A.compressed = true;
+          this.key = BF(k, 'hex');
+          this.compressed = A.compressed;
+          this.testnet = A.testnet;
+          this.hex = this.key.hex();
+          this.wif = S.privateKeyToWif(this.key, A);
+        } else {
+          this.wif = k;
+          this.key = S.wifToPrivateKey(k, {
+            hex: false
+          });
+          this.hex = this.key.hex();
+          this.compressed = ![S.MAINNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX, S.TESTNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX].includes(k[0]);
+          this.testnet = [S.TESTNET_PRIVATE_KEY_COMPRESSED_PREFIX, S.TESTNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX].includes(k[0]);
+        }
+      } else {
+        k = BF(k);
+        if (k.length !== 32) throw new Error('private key invalid');
+        if (A.compressed === null) A.compressed = true;
+        this.compressed = A.compressed;
+        this.testnet = A.testnet;
+        this.key = k;
+        this.hex = this.key.hex();
+        this.wif = S.privateKeyToWif(this.key, A);
+      }
+    }
+  };
+
+  PrivateKey.prototype.toString = function () {
+    return "".concat(this.wif);
+  };
+
+  var PublicKey = function PublicKey(k) {
+    var A = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    (0, _classCallCheck2["default"])(this, PublicKey);
+    defArgs(A, {
+      compressed: null,
+      testnet: false
+    });
+    this.compressed = A.compressed;
+    this.testnet = A.testnet;
+
+    if (k instanceof PrivateKey) {
+      A.testnet = k.testnet;
+      A.compressed = k.compressed;
+      k = k.wif;
+    }
+
+    if (S.isString(k)) {
+      if (S.isHex(k)) {
+        k = BF(k, 'hex');
+        if (A.compressed === null) A.compressed = true;
+      } else if (S.isWifValid(k)) {
+        this.compressed = ![S.MAINNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX, S.TESTNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX].includes(k[0]);
+        this.testnet = [S.TESTNET_PRIVATE_KEY_COMPRESSED_PREFIX, S.TESTNET_PRIVATE_KEY_UNCOMPRESSED_PREFIX].includes(k[0]);
+        k = S.privateToPublicKey(k, {
+          compressed: this.compressed,
+          testnet: this.testnet,
+          hex: false
+        });
+      } else throw new Error('private/public key invalid');
+    } else k = BF(k);
+
+    if (k.length === 32) {
+      if (A.compressed === null) A.compressed = true;
+      this.key = S.privateToPublicKey(k, {
+        compressed: A.compressed,
+        testnet: A.testnet,
+        hex: false
+      });
+      this.compressed = A.compressed;
+      this.testnet = A.testnet;
+      this.hex = this.key.hex();
+    } else if (S.isPublicKeyValid(k)) {
+      this.hex = k.hex();
+      this.key = k;
+      this.compressed = this.key.length === 33;
+      this.testnet = A.testnet;
+    } else throw new Error('private/public key invalid');
+  };
+
+  PublicKey.prototype.toString = function () {
+    return "".concat(this.hex);
+  };
+
+  var Address = function Address(k) {
+    var A = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    (0, _classCallCheck2["default"])(this, Address);
+    defArgs(A, {
+      addressType: null,
+      testnet: false,
+      compressed: null
+    });
+
+    if (k === undefined) {
+      if (A.compressed === null) A.compressed = true;
+      this.privateKey = new PrivateKey(undefined, A);
+      this.publicKey = new PublicKey(this.privateKey, A);
+    } else if (S.isString(k)) {
+      if (S.isWifValid(k)) {
+        this.privateKey = new PrivateKey(k, A);
+        A.compressed = this.privateKey.compressed;
+        this.publicKey = new PublicKey(this.privateKey, A);
+        A.testnet = this.privateKey.testnet;
+      } else if (S.isHex(k)) {
+        if (A.compressed === null) A.compressed = true;
+        k = BF(k, 'hex');
+      } else {
+        throw new Error('private/public key invalid');
+      }
+    } else if (k instanceof PrivateKey) {
+      this.privateKey = k;
+      A.testnet = k.testnet;
+      A.compressed = k.compressed;
+      this.publicKey = new PublicKey(this.privateKey, A);
+    } else if (k instanceof PublicKey) {
+      A.testnet = k.testnet;
+      A.compressed = k.compressed;
+      this.publicKey = k;
+    } else {
+      if (!Buffer.isBuffer(k)) k = BF(k);
+    }
+
+    if (Buffer.isBuffer(k)) {
+      if (k.length === 32) {
+        if (A.compressed === null) A.compressed = true;
+        this.privateKey = new PrivateKey(k, A);
+        this.publicKey = new PublicKey(this.privateKey, A);
+      } else if (S.isPublicKeyValid(k)) {
+        this.publicKey = new PublicKey(k, A);
+        A.compressed = this.publicKey.compressed;
+      } else throw new Error('private/public key invalid');
+    }
+
+    this.testnet = A.testnet;
+
+    if (A.addressType === null) {
+      if (A.compressed === false) A.addressType = "P2PKH";else A.addressType = "P2WPKH";
+    }
+
+    if (!["P2PKH", "PUBKEY", "P2WPKH", "P2SH_P2WPKH"].includes(A.addressType)) {
+      throw new Error('address type invalid');
+    }
+
+    this.type = A.addressType;
+
+    if (this.type === 'PUBKEY') {
+      this.publicKeyScript = BC([S.opPushData(this.publicKey.key), BF([O.OP_CHECKSIG])]);
+      this.publicKeyScriptHex = this.publicKeyScript.hex();
+    }
+
+    this.witnessVersion = this.type === "P2WPKH" ? 0 : null;
+
+    if (this.type === "P2SH_P2WPKH") {
+      this.scriptHash = true;
+      this.redeemScript = S.publicKeyTo_P2SH_P2WPKH_Script(this.publicKey.key);
+      this.redeemScriptHex = this.redeemScript.hex();
+      this.hash = S.hash160(this.redeemScript);
+      this.witnessVersion = null;
+    } else {
+      this.scriptHash = false;
+      this.hash = S.hash160(this.publicKey.key);
+    }
+
+    this.hashHex = this.hash.hex();
+    this.testnet = A.testnet;
+    this.address = S.hashToAddress(this.hash, {
+      scriptHash: this.scriptHash,
+      witnessVersion: this.witnessVersion,
+      testnet: this.testnet
+    });
+  };
+
+  Address.prototype.toString = function () {
+    return "".concat(this.address);
+  };
+
+  var ScriptAddress = /*#__PURE__*/function () {
+    function ScriptAddress(s) {
+      var A = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      (0, _classCallCheck2["default"])(this, ScriptAddress);
+      defArgs(A, {
+        witnessVersion: 0,
+        testnet: false
+      });
+      this.witnessVersion = A.witnessVersion;
+      this.testnet = A.testnet;
+      s = getBuffer(s);
+      this.script = s;
+      this.scriptHex = s.hex();
+      if (this.witnessVersion === null) this.hash = S.hash160(this.script);else this.hash = S.sha256(this.script);
+      this.scriptOpcodes = S.decodeScript(this.script);
+      this.scriptOpcodesAsm = S.decodeScript(this.script, {
+        asm: true
+      });
+      this.address = S.hashToAddress(this.hash, {
+        scriptHash: true,
+        witnessVersion: this.witnessVersion,
+        testnet: this.testnet
+      });
+    }
+
+    (0, _createClass2["default"])(ScriptAddress, null, [{
+      key: "multisig",
+      value: function multisig(n, m, keyList) {
+        var A = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+        if (n > 15 || m > 15 || n > m || n < 1 || m < 1) throw new Error('invalid n of m maximum 15 of 15 multisig allowed');
+        if (keyList.length !== m) throw new Error('invalid address list count');
+        var s = [BF([0x50 + n])];
+
+        var _iterator = _createForOfIteratorHelper(keyList),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var k = _step.value;
+
+            if (S.isString(k)) {
+              if (S.isHex(k)) k = BF(k, 'hex');else if (S.isWifValid(k)) k = S.privateToPublicKey(k, {
+                hex: false
+              });else throw new Error('invalid key in key list');
+            }
+
+            if (k instanceof Address) k = k.publicKey.key;
+            if (k instanceof PrivateKey) k = S.privateToPublicKey(k.publicKey.key);
+            if (!Buffer.isBuffer(k)) k = BF(k);
+            if (k.length === 32) k = S.privateToPublicKey(k);
+            if (k.length !== 33) throw new Error('invalid public key list element size');
+            s.push(BC([BF(S.intToVarInt(k.length)), k]));
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+
+        s.push(BF([0x50 + m, O.OP_CHECKMULTISIG]));
+        s = BC(s);
+        return new ScriptAddress(s, A);
+      }
+    }]);
+    return ScriptAddress;
+  }();
+
+  ScriptAddress.prototype.toString = function () {
+    return "".concat(this.address);
+  };
+
+  S.PrivateKey = PrivateKey;
+  S.PublicKey = PublicKey;
+  S.ScriptAddress = ScriptAddress;
+  S.Address = Address;
+};
