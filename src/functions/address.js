@@ -84,19 +84,24 @@ module.exports = function (S) {
             return (A.num) ? S.SCRIPT_TYPES["P2SH"] : "P2SH";
         if ([S.MAINNET_ADDRESS_PREFIX, S.TESTNET_ADDRESS_PREFIX, S.TESTNET_ADDRESS_PREFIX_2].includes(a[0]))
             return (A.num) ? S.SCRIPT_TYPES["P2PKH"] : "P2PKH";
-        if ([S.MAINNET_SEGWIT_ADDRESS_PREFIX, S.TESTNET_SEGWIT_ADDRESS_PREFIX].includes(a.slice(0, 2))) {
-            if (a.length === 42) return (A.num) ? S.SCRIPT_TYPES["P2WPKH"] : "P2WPKH";
-            if (a.length === 62) return (A.num) ? S.SCRIPT_TYPES["P2WSH"] : "P2WSH";
+
+        if (S.MAINNET_SEGWIT_ADDRESS_PREFIX === a.slice(0, 3)) {
+            if (a.length === 43) return (A.num) ? S.SCRIPT_TYPES["P2WPKH"] : "P2WPKH";
+            if (a.length === 63) return (A.num) ? S.SCRIPT_TYPES["P2WSH"] : "P2WSH";
+        }
+        if (S.TESTNET_SEGWIT_ADDRESS_PREFIX === a.slice(0, 4)) {
+            if (a.length === 44) return (A.num) ? S.SCRIPT_TYPES["P2WPKH"] : "P2WPKH";
+            if (a.length === 64) return (A.num) ? S.SCRIPT_TYPES["P2WSH"] : "P2WSH";
         }
         return (A.num) ? S.SCRIPT_TYPES["NON_STANDARD"] : "NON_STANDARD";
     };
 
     S.addressNetType = (a) => {
         if ([S.MAINNET_SCRIPT_ADDRESS_PREFIX, S.MAINNET_ADDRESS_PREFIX].includes(a[0])) return "mainnet";
-        if (a.slice(0, 2) === S.MAINNET_SEGWIT_ADDRESS_PREFIX) return "mainnet";
+        if (a.slice(0, 3) === S.MAINNET_SEGWIT_ADDRESS_PREFIX) return "mainnet";
         if ([S.TESTNET_SCRIPT_ADDRESS_PREFIX,
             S.TESTNET_ADDRESS_PREFIX, S.TESTNET_ADDRESS_PREFIX_2].includes(a[0])) return "testnet";
-        if (a.slice(0, 2) === S.TESTNET_SEGWIT_ADDRESS_PREFIX) return "testnet";
+        if (a.slice(0, 4) === S.TESTNET_SEGWIT_ADDRESS_PREFIX) return "testnet";
         return null;
     };
 
@@ -147,7 +152,7 @@ module.exports = function (S) {
             let prefix, payload;
             if ([S.TESTNET_SEGWIT_ADDRESS_PREFIX,
                 S.MAINNET_SEGWIT_ADDRESS_PREFIX].includes(address.split("1")[0].toLowerCase())) {
-                if (address.length !== 42 && address.length !== 62) return false;
+                if (address.length !== 43 && address.length !== 63 && address.length !== 44 && address.length !== 64) return false;
                 let pp = address.split('1');
                 prefix = pp[0];
                 payload = pp[1];

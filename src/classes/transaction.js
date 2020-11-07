@@ -15,7 +15,7 @@ module.exports = function (S) {
     class Transaction {
         constructor(A = {}) {
             ARGS(A, {
-                rawTx: null, format: 'decoded', version: 1,
+                rawTx: null, format: 'decoded', version: 2,
                 lockTime: 0, testnet: false, autoCommit: true, keepRawTx: false
             });
             if (!["decoded", "raw"].includes(A.format)) throw new Error('format error, raw or decoded allowed');
@@ -36,6 +36,7 @@ module.exports = function (S) {
             this.confirmations = null;
             this.time = null;
             this.blockTime = null;
+            this.lockTime = A.lockTime;
             this.blockIndex = null;
             this.coinbase = false;
             this.fee = null;
@@ -103,11 +104,11 @@ module.exports = function (S) {
 
             if (sw > 0) {
                 this.segwit = true;
-                this.hash = S.doubleSha256(this.rawTx);
-                this.txId = S.doubleSha256(BC([this.rawTx.slice(0, 4),
+                this.hash = S.sha256(this.rawTx);
+                this.txId = S.sha256(BC([this.rawTx.slice(0, 4),
                     this.rawTx.slice(6, sw), this.rawTx.slice(this.rawTx.length - 4, this.rawTx.length)]));
             } else {
-                this.txId = S.doubleSha256(this.rawTx);
+                this.txId = S.sha256(this.rawTx);
                 this.hash = this.txId;
                 this.segwit = false;
             }
@@ -465,9 +466,9 @@ module.exports = function (S) {
         if (this.segwit)
             for (let i in this.vIn) if (this.vIn[i].txInWitness === undefined) this.vIn[i].txInWitness = [];
         let nonSegwitView = this.serialize({segwit: false, hex: false});
-        this.txId = S.doubleSha256(nonSegwitView);
+        this.txId = S.sha256(nonSegwitView);
         this.rawTx = this.serialize({segwit: true, hex: false});
-        this.hash = S.doubleSha256(this.rawTx);
+        this.hash = S.sha256(this.rawTx);
         this.size = this.rawTx.length;
         this.bSize = nonSegwitView.length;
         this.weight = this.bSize * 3 + this.size;
@@ -604,8 +605,10 @@ module.exports = function (S) {
                 nSequence = BF(S.intToBytes(this.vIn[i].sequence, 4));
             }
         }
-        let hashPrevouts = (hp.length > 0) ? S.doubleSha256(BC(hp)) : BA(32, 0);
-        let hashSequence = (hs.length > 0) ? S.doubleSha256(BC(hs)) : BA(32, 0);
+        // https://github.com/wu-emma/bitgesell/blob/cb9f0da214f38691b0a4947fd9f9c4ff9a647f43/src/script/interpreter.cpp#L1186
+        let hashPrevouts = (hp.length > 0) ? S.sha3(BC(hp)) : BA(32, 0);
+        // https://github.com/wu-emma/bitgesell/blob/cb9f0da214f38691b0a4947fd9f9c4ff9a647f43/src/script/interpreter.cpp#L1196
+        let hashSequence = (hs.length > 0) ? S.sha3(BC(hs)) : BA(32, 0);
         value = BF(S.intToBytes(value, 8));
 
         for (let o in this.vOut) {
@@ -623,8 +626,8 @@ module.exports = function (S) {
                 }
             }
         }
-
-        let hashOutputs = (ho.length > 0) ? S.doubleSha256(BC(ho)) : BA(32, 0);
+        // https://github.com/wu-emma/bitgesell/blob/cb9f0da214f38691b0a4947fd9f9c4ff9a647f43/src/script/interpreter.cpp#L1206
+        let hashOutputs = (ho.length > 0) ? S.sha3(BC(ho)) : BA(32, 0);
         let pm = BC([BF(S.intToBytes(this.version, 4)),
             hashPrevouts, hashSequence, outpoint, scriptCode,
             value, nSequence, hashOutputs,
@@ -632,7 +635,10 @@ module.exports = function (S) {
             BF(S.intToBytes(A.sigHashType, 4))]);
 
         if (A.preImage) return (this.format === 'raw') ? pm.hex() : pm;
-        return S.doubleSha256(pm, {'hex': this.format !== 'raw'});
+        // https://github.com/wu-emma/bitgesell/blob/cb9f0da214f38691b0a4947fd9f9c4ff9a647f43/src/hash.h#L180
+        // https://github.com/wu-emma/bitgesell/blob/cb9f0da214f38691b0a4947fd9f9c4ff9a647f43/src/script/interpreter.cpp#L1281
+        return S.sha3(pm, {'hex': this.format !== 'raw'});
+
     };
 
     Transaction.prototype.signInput = function (n, A = {}) {
