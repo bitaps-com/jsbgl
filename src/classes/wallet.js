@@ -8,6 +8,22 @@ module.exports = function (S) {
     let ARGS = S.defArgs;
 
     class Wallet {
+         /**
+        * The class for creating wallet object.
+        *
+        * :param from: (optional) should be mnemonic phrase, extended public key,extended private key, by default is null (generate new wallet).
+        * :param passphrase: (optional) passphrase to get ability use 2FA approach forcreating seed, by default is empty string.
+        * :param path: (optional) "BIP44", "BIP49", "BIP84", by default is "BIP84"
+        * :param testnet: (optional) flag for testnet network, by default is ``false``.
+        * :param strength: (optional) entropy bits strength, by default is 256 bit.
+        * :param threshold: (optional) integer, by default is 1
+        * :param shares: (optional) integer, by default is 1
+        * :param wordList: (optional) word list, by default is BIP39_WORDLIST
+        * :param addressType: (optional) "P2PKH", "P2SH_P2WPKH", "P2WPKH"
+        * :param hardenedAddresses: (optional) boolean, by default is ``false``.
+        * :param account: (optional) integer
+        * :param chain: (optional) integer
+        */
         constructor(A = {}) {
             ARGS(A, {
                 from: null,
@@ -43,6 +59,9 @@ module.exports = function (S) {
             let fromType = null;
             if (from === null) {
                 let e = S.generateEntropy({strength: A.strength});
+                /**
+                * mnemonic (string)
+                */
                 this.mnemonic = S.entropyToMnemonic(e, {wordList: A.wordList});
                 this.seed = S.mnemonicToSeed(this.mnemonic, {
                     hex: true, wordList: A.wordList,
@@ -153,7 +172,14 @@ module.exports = function (S) {
 
                 if (this.pathType !== "custom") {
 
+                    /**
+                    * account private xkey (string)
+                    */
                     this.accountXPrivateKey = S.deriveXKey(from, this.__path, {subPath: true});
+
+                    /**
+                    * account public xkey (string)
+                    */
                     this.accountXPublicKey = S.xPrivateToXPublicKey(this.accountXPrivateKey);
 
                     this.accountXPrivateKey = S.deriveXKey(from, this.__path, {subPath: true});
@@ -211,6 +237,18 @@ module.exports = function (S) {
         this.chain = i;
     };
 
+    /**
+    * the class method for creating a wallet address.
+    *
+    * :parameters:
+    *   :i: index
+    *   :external: (optional) boolean, by default is ``true``
+    * :return: object:
+    *
+    *    - address
+    *    - publicKey
+    *    - privateKey (in case wallet is restored from private xkey or mnemonic)
+    */
     Wallet.prototype.getAddress = function (i, external = true) {
         let r = {};
         let h = (this.hardenedAddresses) ? "'" : "";

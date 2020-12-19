@@ -7,14 +7,34 @@ module.exports = function (S) {
     let O = S.OPCODE;
 
     class PrivateKey {
+         /**
+         * The class for creating private key object.
+         *
+         * :parameters:
+         *    :k: (optional) private key in HEX,  bytes string or WIF format. In case no key specified new random private key will be created
+         * :param compressed: (optional) if set to ``true`` private key corresponding compressed public key, by default is ``true``. Recommended use only compressed public key.
+         * :param testnet: (optional) flag for testnet network, by default is ``false``.
+         */
         constructor(k, A = {}) {
             defArgs(A, {compressed: null, testnet: false});
             if (k === undefined) {
                 if (A.compressed === null) A.compressed = true;
+                 /**
+                 * flag for compressed type of corresponding public key (boolean)
+                 */
                 this.compressed = A.compressed;
+                /**
+                 * flag for testnet network (boolean)
+                 */
                 this.testnet = A.testnet;
                 this.key = S.createPrivateKey({wif: false});
+                /**
+                 * private key in HEX (string)
+                 */
                 this.hex = this.key.hex();
+                /**
+                 * private key in WIF format (string)
+                 */
                 this.wif = S.privateKeyToWif(this.key, A);
             } else {
                 if (S.isString(k)) {
@@ -55,9 +75,41 @@ module.exports = function (S) {
 
 
     class PublicKey {
+        /**
+        * The class for creating public key object.
+        *
+        * :parameters:
+        *   :k: one of this types allowed:
+        *
+        *           -- private key is instance of ``PrivateKey`` class
+        *
+        *           -- private key HEX encoded string
+        *
+        *           -- private key 32 bytes string
+        *
+        *           -- private key in WIF format
+        *
+        *           -- public key in HEX encoded string
+        *
+        *           -- public key [33/65] bytes string
+        *
+        * *In case no key specified with HEX or bytes string you have to provide flag for testnet
+        * and compressed key. WIF format and* ``PrivateKey`` *instance already contain this flags.
+        * For HEX or bytes public key only testnet flag has the meaning, comressed flag is determined
+        * according to the length of key.*
+        *
+        * :param compressed: (optional) if set to ``true`` private key corresponding compressed public key, by default is ``true``. Recommended use only compressed public key.
+        * :param testnet: (optional) flag for testnet network, by default is ``false``.
+        */
         constructor(k, A = {}) {
             defArgs(A, {compressed: null, testnet: false});
+            /**
+             * flag for compressed type of corresponding public key (boolean)
+             */
             this.compressed = A.compressed;
+            /**
+             * flag for testnet network (boolean)
+             */
             this.testnet = A.testnet;
             if (k instanceof PrivateKey) {
                 A.testnet = k.testnet;
@@ -85,6 +137,9 @@ module.exports = function (S) {
                 this.testnet = A.testnet;
                 this.hex = this.key.hex();
             } else if (S.isPublicKeyValid(k)) {
+                /**
+                 * public key in HEX (string)
+                 */
                 this.hex = k.hex();
                 this.key = k;
                 this.compressed = (this.key.length === 33);
@@ -99,12 +154,39 @@ module.exports = function (S) {
 
 
     class Address {
+        /**
+        * The class for Address object.
+        *
+        * :parameters:
+        *   :k: (optional) one of this types allowed:
+        *
+        *           -- private key WIF format
+        *
+        *           -- instance of ``PrivateKey``
+        *
+        *           -- private key HEX encoded string
+        *
+        *           -- instance of ``PublicKey``
+        *
+        * :param addressType: (optional) P2PKH, PUBKEY, P2WPKH, P2SH_P2WPKH.
+        * :param testnet: (optional) flag for testnet network, by default is ``false``.
+        * :param compressed: (optional) if set to ``true`` private key corresponding compressed public key, by default is ``true``. Recommended use only compressed public key.
+        *
+        * *In case instance is created from WIF private key,* ``PrivateKey`` *or* ``PublicKey`` *compressed and testnet flags
+        * already contain in initial key parameter and will be ignored.*
+        */
         constructor(k, A = {}) {
             defArgs(A, {addressType: null, testnet: false, compressed: null});
 
             if (k === undefined) {
                 if (A.compressed === null) A.compressed = true;
+                /**
+                 * instance of ``PrivateKey`` class
+                 */
                 this.privateKey = new PrivateKey(undefined, A);
+                /**
+                 * instance of ``PublicKey`` class
+                 */
                 this.publicKey = new PublicKey(this.privateKey, A);
             } else if (S.isString(k)) {
                 if (S.isWifValid(k)) {
@@ -147,6 +229,9 @@ module.exports = function (S) {
                 } else throw new Error('private/public key invalid');
             }
 
+            /**
+             * flag for testnet network address  (boolean)
+             */
             this.testnet = A.testnet;
 
 
@@ -156,11 +241,14 @@ module.exports = function (S) {
             }
 
 
+
             if (!["P2PKH", "PUBKEY", "P2WPKH", "P2SH_P2WPKH"].includes(A.addressType)) {
                 throw new Error('address type invalid');
             }
 
-
+            /**
+             * address type (string)
+             */
             this.type = A.addressType;
             if (this.type === 'PUBKEY') {
                 this.publicKeyScript = BC([S.opPushData(this.publicKey.key), BF([O.OP_CHECKSIG])])
@@ -168,17 +256,35 @@ module.exports = function (S) {
             }
             this.witnessVersion = (this.type === "P2WPKH") ? 0 : null;
             if (this.type === "P2SH_P2WPKH") {
+                /**
+                * flag for script hash address (boolean)
+                */
                 this.scriptHash = true;
+                /**
+                * redeeem script, only for P2SH_P2WPKH (bytes)
+                */
                 this.redeemScript = S.publicKeyTo_P2SH_P2WPKH_Script(this.publicKey.key);
+                /**
+                * redeeem script HEX, only for P2SH_P2WPKH (string)
+                */
                 this.redeemScriptHex = this.redeemScript.hex();
+                /**
+                * address hash
+                */
                 this.hash = S.hash160(this.redeemScript);
                 this.witnessVersion = null;
             } else {
                 this.scriptHash = false;
                 this.hash = S.hash160(this.publicKey.key);
             }
+            /**
+             * address hash HEX (string)
+             */
             this.hashHex = this.hash.hex();
             this.testnet = A.testnet;
+            /**
+             * address in base58 or bech32 encoding (string)
+             */
             this.address = S.hashToAddress(this.hash, {
                 scriptHash: this.scriptHash,
                 witnessVersion: this.witnessVersion, testnet: this.testnet

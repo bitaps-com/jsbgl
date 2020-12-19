@@ -101,12 +101,26 @@ module.exports = function (S) {
     };
 
 
+    /**
+    * Convert bytes to string.
+    *
+    * :parameters:
+    *    :bytes: bytes
+    * :return: string.
+    */
     S.bytesToString = function (bytes) {
         return bytes.map(function (x) {
             return String.fromCharCode(x)
         }).join('')
     };
 
+    /**
+    * Convert HEX string to bytes.
+    *
+    * :parameters:
+    *    :hex: HEX string
+    * :return: bytes.
+    */
     S.hexToBytes = (hex) => {
         if (hex.length % 2 === 1) throw new Error("hexToBytes can't have a string with an odd number of characters.");
         if (hex.indexOf('0x') === 0) hex = hex.slice(2);
@@ -115,12 +129,28 @@ module.exports = function (S) {
         })
     };
 
+    /**
+    * Convert string to bytes.
+    *
+    * :parameters:
+    *    :str: string
+    * :return: bytes.
+    */
     S.stringToBytes = function (str) {
         return str.split('').map(function (x) {
             return x.charCodeAt(0)
         })
     };
 
+    /**
+    * Convert integer to bytes.
+    *
+    * :parameters:
+    *   :x: integer.
+    *   :n: bytes count.
+    *   :byte_order: (optional) byte order 'big' or 'little', by default is 'little'.
+    * :return: bytes.
+    */
     S.intToBytes = function (x, n, byte_order = "little") {
         let bytes = [];
         let i = n;
@@ -138,7 +168,13 @@ module.exports = function (S) {
         }
         return bytes;
     };
-
+    /**
+    * Convert integer to variable integer
+    *
+    * :parameters:
+    *    :i: integer.
+    * :return: bytes.
+    */
     S.intToVarInt = function (i) {
         let r;
         if (i instanceof S.BN) {
@@ -158,6 +194,14 @@ module.exports = function (S) {
         }
     }
 
+    /**
+    * Convert variable integer to integer
+    *
+    * :parameters:
+    *    :s: bytes variable integer.
+    *    :bn: (optional) BigNum flag, by default is ``false``
+    * :return: integer.
+    */
     S.varIntToInt = function (s, bn = false) {
         let r;
         if (s[0] < 0xfd) r = new S.BN(s[0]);
@@ -168,9 +212,32 @@ module.exports = function (S) {
         return r.toNumber();
     };
 
+     /**
+    * Get variable integer length in bytes from integer value
+    *
+    * :parameters:
+    *    :b: integer
+    * :return: integer.
+    */
     S.varIntLen = (b) => (b[0] < 0xfd) ? 1 : (b[0] < 0xffff) ? 2 : (b[0] < 0xffffffff) ? 4 : 8;
 
+
+    /**
+    * Encode raw transaction hash to HEX string with bytes order change
+    *
+    * :parameters:
+    *   :raw_hash: transaction hash in bytes string.
+    * :return:  HEX encoded string.
+    */
     S.rh2s = (s) => S.Buffer.from(s).reverse().hex();
+
+    /**
+    * Decode HEX  transaction hash to bytes with byte order change
+    *
+    * :parameters:
+    *   :hash_string: HEX encoded string.
+    * :return:  bytes string.
+    */
     S.s2rh = (s) => S.Buffer.from(s, 'hex').reverse();
 
 };

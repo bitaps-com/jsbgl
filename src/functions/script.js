@@ -47,6 +47,20 @@ module.exports = function (S) {
         return (A.hex) ? s.hex() : s;
     };
 
+    /**
+    * Parse script and return script type, script address and required signatures count.
+    *
+    * :parameters:
+    *   :s: script in bytes string or HEX encoded string format.
+    * :param segwit:  (optional) If set to ``true`` recognize P2WPKH and P2WSH sripts, by default is ``true``.
+    * :return: object:
+    *
+    *        - nType - numeric script type
+    *        - type  - script type
+    *        - addressHash - address hash in case address recognized
+    *        - script - script if no address recognized
+    *        - reqSigs - required signatures count
+    */
     S.parseScript = (s, A = {}) => {
         ARGS(A, {segwit: true});
         s = getBuffer(s);
@@ -144,6 +158,14 @@ module.exports = function (S) {
         return null;
     };
 
+     /**
+    *Decode script to ASM format or to human readable OPCODES string.
+    *
+    * :parameters:
+    *   :s: script in bytes string or HEX encoded string format.
+    * :param asm:  (optional) If set to ``true`` decode to ASM format, by default is ``false``.
+    * :return: script in ASM format string or OPCODES string.
+    */
     S.decodeScript = (s, A = {}) => {
         ARGS(A, {asm: false});
         s = getBuffer(s);
@@ -203,6 +225,16 @@ module.exports = function (S) {
         return result.join(' ');
     };
 
+    /**
+    * Delete OP_CODE or subscript from script.
+    *
+    * :parameters:
+    *   :script: target script in bytes or HEX encoded string.
+    *   :subScript: sub_script which is necessary to remove from target script in bytes or HEX encoded string.
+    * :param hex: (optional) return HEX encoded string result flag, by default is ``false``.
+    * :return: script in bytes or HEX encoded string corresponding to the format of target script.
+    *
+    */
     S.deleteFromScript = (script, subScript, A = {}) => {
         ARGS(A, {hex: false});
         if (subScript === undefined) return script;
@@ -259,6 +291,15 @@ module.exports = function (S) {
         return (A.hex) ? out.hex() : out;
     };
 
+    /**
+    * Encode script to hash HASH160 or SHA256 in dependency of the witness.
+    *
+    * :parameters:
+    *   :s: script in bytes or HEX encoded string.
+    * :param witness: (optional) If set to ``true`` return SHA256 hash for P2WSH, by default is ``false``.
+    * :param hex: (optional) return HEX encoded string result flag, by default is ``true``.
+    * :return: hash HASH160 or SHA256 of script in bytes or HEX encoded.
+    */
     S.scriptToHash = (s, A = {}) => {
         ARGS(A, {witness: false, hex: true});
         return (A.witness) ? S.sha256(s, A) : S.hash160(s, A)
@@ -341,6 +382,15 @@ module.exports = function (S) {
         return null;
     };
 
+    /**
+    * Verify signature for message and given public key
+    *
+    * :parameters:
+    *   :s: signature in bytes or HEX encoded string.
+    *   :p: public key in bytes or HEX encoded string.
+    *   :m: message in bytes or HEX encoded string.
+    * :return: boolean.
+    */
     S.verifySignature = (s, p, m) => {
         s = getBuffer(s);
         p = getBuffer(p);
@@ -428,6 +478,14 @@ module.exports = function (S) {
         return null;
     };
 
+    /**
+    * Check is valid signature encoded in DER format
+    *
+    * :parameters:
+    *   :s: signature in bytes or HEX encoded string.
+    * :return:  boolean.
+    */
+
     S.isValidSignatureEncoding = (s) => {
         // # Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash]
         // # * total-length: 1-byte length descriptor of everything that follows,
@@ -483,6 +541,15 @@ module.exports = function (S) {
     };
 
 
+    /**
+    * Sign message
+    *
+    * :parameters:
+    *   :m: message in bytes or HEX encoded string.
+    *   :privateKey: private key (bytes, hex encoded string or WIF format)
+    * :param base64: (optional) If set to ``true`` return key signature BASE64 format, by default is ``true``.
+    * :return: DER or BASE64 encoded signature in bytes.
+    */
     S.signBitcoinMessage = (m, privateKey, A = {}) => {
         ARGS(A, {base64: true});
         m = S.bitcoinMessage(m);

@@ -8,6 +8,15 @@ module.exports = function (S) {
     let free = CM._free;
     let getValue = CM.getValue;
 
+    /**
+    * Encode to a base58-encoded string
+    *
+    * :parameters:
+    *   :m: string to encode
+    * :param encoding: (optional), by default 'hex|utf8'.
+    * :param checksum: (optional) boolean, by default is ``false``.
+    * :return: base58 string format.
+    */
     S.encodeBase58 = (m, A = {}) => {
         ARGS(A, {encoding: 'hex|utf8', checkSum: false});
         m = getBuffer(m, A.encoding);
@@ -30,6 +39,15 @@ module.exports = function (S) {
         return out.slice(0, q).toString();
     };
 
+    /**
+    * Decode a base58-encoding string
+    *
+    * :parameters:
+    *   :m: string to decode
+    * :param hex: (optional) return result as HEX encoded string, by default is ``true``.
+    * :param checksum: (optional) boolean, by default is ``false``.
+    * :return: HEX or bytes string format.
+    */
     S.decodeBase58 = (m, A = {}) => {
         ARGS(A, {hex: true, checkSum: false});
         if (!S.isString(m)) throw new Error('decodeBase58 string required');

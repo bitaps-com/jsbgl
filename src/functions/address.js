@@ -6,6 +6,18 @@ module.exports = function (S) {
     let BC = Buffer.concat;
     let O = S.OPCODE;
 
+
+
+    /**
+    * Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160,P2WSH script hash is SHA256.
+    *
+    * :parameters:
+    *   :ha: public key hash or script hash in HEX or bytes string format.
+    * :param testnet: (optional) flag for testnet network, by default is ``false``.
+    * :param scriptHash: (optional) flag for script hash (P2SH address), by default is ``false``.
+    * :param witnessVersion: (optional) witness program version, by default is 0, for legacy  address format use null.
+    * :return: address in base58 or bech32 format.
+    */
     S.hashToAddress = (ha, A = {}) => {
         ARGS(A, {testnet: false, scriptHash: false, witnessVersion: 0});
         ha = getBuffer(ha);
@@ -46,6 +58,14 @@ module.exports = function (S) {
         return hrp + '1' + S.rebase_5_to_32(ha.concat(checksum), false);
     };
 
+    /**
+    * Get address hash from base58 or bech32 address format.
+    *
+    * :parameters:
+    *   :a: address in base58 or bech32 format.
+    * :param hex:  (optional) If set to ``true`` return key in HEX format, by default is ``false``.
+    * :return: script in HEX or bytes string.
+    */
     S.addressToHash = (a, A = {}) => {
         ARGS(A, {hex: false});
         if (!S.isString(a)) throw new Error('address invalid');
@@ -61,6 +81,16 @@ module.exports = function (S) {
         return (A.hex) ? h.hex() : h;
     };
 
+    /**
+    * Get address from public key/script hash. In case PUBKEY, P2PKH, P2PKH public key/script hash is SHA256+RIPEMD160, P2WSH script hash is SHA256.
+    *
+    * :parameters:
+    *   :pubkey: public key HEX or bytes string format.
+    * :param testnet: (optional) flag for testnet network, by default is ``false``.
+    * :param p2sh_p2wpkh: (optional) flag for P2WPKH inside P2SH address, by default is ``false``.
+    * :param witnessVersion: (optional) witness program version, by default is 0, for legacy address format use null.
+    * :return: address in base58 or bech32 format.
+    */
     S.publicKeyToAddress = (pubkey, A = {}) => {
         ARGS(A, {testnet: false, p2sh_p2wpkh: false, witnessVersion: 0});
         pubkey = getBuffer(pubkey);
@@ -78,6 +108,14 @@ module.exports = function (S) {
         return S.hashToAddress(h, A);
     };
 
+    /**
+    * Get address type.
+    *
+    * :parameters:
+    *   :a: address in base58 or bech32 format.
+    * :param num: (optional) If set to ``true`` return type in numeric format, by default is ``false``.
+    * :return: address type in string or numeric format.
+    */
     S.addressType = (a, A = {}) => {
         ARGS(A, {num: false});
         if ([S.TESTNET_SCRIPT_ADDRESS_PREFIX, S.MAINNET_SCRIPT_ADDRESS_PREFIX].includes(a[0]))
@@ -105,6 +143,14 @@ module.exports = function (S) {
         return null;
     };
 
+    /**
+    * Get public key script from address.
+    *
+    * :parameters:
+    *   :a: address in base58 or bech32 format.
+    * :param hex:  (optional) If set to ``true`` return key in HEX format, by default is ``false``.
+    * :return: public key script in HEX or bytes string.
+    */
     S.addressToScript = (a, A = {}) => {
         ARGS(A, {hex: false});
         if (!S.isString(a)) throw new Error('address invalid');
@@ -127,6 +173,15 @@ module.exports = function (S) {
 
     S.getWitnessVersion = (address) => S.rebase_32_to_5(address.split(1)[1])[0];
 
+
+    /**
+    * Check is address valid.
+    *
+    * :parameters:
+    *   :address: address in base58 or bech32 format.
+    * :param testnet: (optional) flag for testnet network, by default is ``false``.
+    * :return: boolean.
+    */
     S.isAddressValid = (address, A = {}) => {
         ARGS(A, {testnet: false});
         if (!S.isString(address)) return false;

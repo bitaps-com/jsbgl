@@ -12,6 +12,15 @@ module.exports = function (S) {
     let getValue = crypto.getValue;
 
 
+    /**
+    * Create private key
+    *
+    * :param compressed: (optional) flag of private key compressed format, by default is ``true``
+    * :param testnet: (optional) flag for testnet network, by default is ``false``.
+    * :param wif:  (optional) If set to ``true`` return key in WIF format, by default is ``true``.
+    * :param hex:  (optional) If set to ``true`` return key in HEX format, by default is ``false``.
+    * :return: Private key in wif format (default), hex encoded byte string in case of hex flag or raw bytes string in case wif and hex flags set to ``false``.
+    */
     S.createPrivateKey = (A = {}) => {
         ARGS(A, {compressed: true, testnet: false, wif: true, hex: false});
         if (A.wif) return S.privateKeyToWif(S.generateEntropy({hex: false}), A);
@@ -19,6 +28,15 @@ module.exports = function (S) {
         return S.generateEntropy({hex: false});
     };
 
+    /**
+    * Encode private key in HEX or RAW bytes format to WIF format.
+    *
+    * :parameters:
+    *   :h: private key 32 byte string or HEX encoded string.
+    * :param compressed: (optional) flag of public key compressed format, by default is ``true``.
+    * :param testnet: (optional) flag for testnet network, by default is ``false``.
+    * :return: Private key in WIF format.
+    */
     S.privateKeyToWif = (h, A = {}) => {
         ARGS(A, {compressed: true, testnet: false});
         h = getBuffer(h);
@@ -34,6 +52,14 @@ module.exports = function (S) {
         return S.encodeBase58(h);
     };
 
+    /**
+    * Decode WIF private key to bytes string or HEX encoded string
+    *
+    * :parameters:
+    *   :h: private key in WIF format string.
+    * :param hex:  (optional) if set to ``true`` return key in HEX format, by default is ``true``.
+    * :return: Private key HEX encoded string or raw bytes string.
+    */
     S.wifToPrivateKey = (h, A = {}) => {
         ARGS(A, {hex: true});
         h = S.decodeBase58(h, {hex: false});
@@ -42,6 +68,14 @@ module.exports = function (S) {
         return (A.hex) ? h.slice(1, 33).hex() : h.slice(1, 33)
     };
 
+
+    /**
+    Check is private key in WIF format string is valid.
+    *
+    * :parameters:
+    *   :wif: private key in WIF format string.
+    * :return: boolean.
+    */
     S.isWifValid = (wif) => {
         if (!S.isString(wif)) return false;
         if (!S.PRIVATE_KEY_PREFIX_LIST.includes(wif[0])) return false;
@@ -62,6 +96,15 @@ module.exports = function (S) {
         return false;
     };
 
+    /**
+    * Get public key from private key using ECDSA secp256k1
+    *
+    * :parameters:
+    *   :privateKey: private key in WIF, HEX or bytes.
+    * :param compressed: (optional) flag of public key compressed format, by default is ``true``. In case private_key in WIF format, this flag is set in accordance with the key format specified in WIF string.
+    * :param hex:  (optional) if set to ``true`` return key in HEX format, by default is ``true``.
+    * :return: 33/65 bytes public key in HEX or bytes string.
+    */
     S.privateToPublicKey = (privateKey, A = {}) => {
         ARGS(A, {compressed: true, hex: true});
         if (!isBuffer(privateKey)) {
@@ -105,6 +148,13 @@ module.exports = function (S) {
         return (A.hex) ? out.hex() : out;
     };
 
+    /**
+    * Check public key is valid.
+    *
+    * :parameters:
+    *   :key: public key in HEX or bytes string format.
+    * :return: boolean.
+    */
     S.isPublicKeyValid = (key) => {
         if (S.isString(key)) {
             if (!S.isHex(key)) return false;

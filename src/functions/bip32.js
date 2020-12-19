@@ -10,6 +10,15 @@ module.exports = function (S) {
     let BN = S.BN;
     let getValue = CM.getValue;
 
+    /**
+    * Create extended private key from seed
+    *
+    * :parameters:
+    *   :seed: seed HEX or bytes string.
+    * :param testnet: (optional) flag for testnet network, by default is ``false``.
+    * :param base58: (optional) return result as base58 encoded string, by default is ``true``.
+    * :return: extended private key  in base58 string format.
+    */
     S.createMasterXPrivateKey = (seed, A = {}) => {
         ARGS(A, {testnet: false, base58: true});
         let i = S.hmacSha512("Bitcoin seed", seed);
@@ -23,6 +32,14 @@ module.exports = function (S) {
         return key;
     };
 
+    /**
+    * Get extended public key from extended private key using ECDSA secp256k1
+    *
+    * :parameters:
+    *   :xKey: extended private key in base58, HEX or bytes string.
+    * :param base58: (optional) return result as base58 encoded string, by default is ``true``.
+    * :return: extended private key  in base58 string format.
+    */
     S.xPrivateToXPublicKey = (xKey, A = {}) => {
         ARGS(A, {base58: true});
         if (S.isString(xKey)) xKey = S.decodeBase58(xKey, {hex: false}).slice(0, -4);
@@ -58,6 +75,16 @@ module.exports = function (S) {
         return r;
     };
 
+    /**
+    * Child Key derivation for extended private/public keys
+    *
+    * :parameters:
+    *   :xKey: extended private/public in base58, HEX or bytes string format.
+    *   :path: list of derivation path levels. For hardened derivation use HARDENED_KEY flag.
+    * :param base58: (optional) return result as base58 encoded string, by default is ``true``.
+    * :param subPath: (optional) boolean, by default is ``false``.
+    * :return: extended child private/public key  in base58, HEX or bytes string format.
+    */
     S.deriveXKey = (xKey, path, A = {}) => {
         ARGS(A, {base58: true, subPath: false});
         if (S.isString(xKey))  xKey = S.decodeBase58(xKey, {checkSum: true, hex:false});
@@ -105,6 +132,14 @@ module.exports = function (S) {
         return BC([xPublicKey.slice(0,4), BF([depth]), fingerprint, BF(S.intToBytes(i,4,"big")), s.slice(32), pk]);
     };
 
+    /**
+    * Get public key from extended public key
+    *
+    * :parameters:
+    *   :xPub: extended public in base58, HEX or bytes string format.
+    * :param hex: (optional) return result as HEX encoded string, by default is ``true``.
+    * :return: public key  in HEX or bytes string format.
+    */
     S.publicFromXPublicKey = (xPub, A = {}) => {
         ARGS(A, {hex: true});
         if (S.isString(xPub)) xPub = S.decodeBase58(xPub, {checkSum: true, hex: false});
@@ -112,6 +147,14 @@ module.exports = function (S) {
         return (A.hex) ? xPub.slice(45).hex() : xPub.slice(45)
     };
 
+    /**
+    * Get private key from extended private key
+    *
+    * :parameters:
+    *   :xPriv: extended private in base58, HEX or bytes string format.
+    * :param wif: (optional) return result as WIF format, by default is ``true``.
+    * :return: private key  in HEX or bytes string format.
+    */
     S.privateFromXPrivateKey = (xPriv, A = {}) => {
         ARGS(A, {wif: true});
         if (S.isString(xPriv)) xPriv = S.decodeBase58(xPriv, {checkSum: true, hex: false});

@@ -13,6 +13,18 @@ module.exports = function (S) {
     let iS = S.isString;
 
     class Transaction {
+
+        /**
+        * The class for Transaction object
+        *
+        * :param rawTx: (optional) raw transaction in bytes or HEX encoded string, if no raw transaction provided well be created new empty transaction template.
+        * :param format: (optional) "raw" or "decoded" format. Raw format is mean that all transaction represented in bytes for best performance. Decoded transaction is represented in human readable format using base68, hex, bech32, asm and opcodes. By default "decoded" format using.
+        * :param version: (optional)  transaction version for new template, by default is 2.
+        * :param lockTime: (optional)  transaction lock time for new template, by default is 0.
+        * :param testnet: (optional) flag for testnet network, by default is ``false``.
+        * :param autoCommit: (optional) boolean, by default is ``true``.
+        * :param keepRawTx: (optional) boolean, by default is ``false``.
+        */
         constructor(A = {}) {
             ARGS(A, {
                 rawTx: null, format: 'decoded', version: 2,
@@ -117,7 +129,12 @@ module.exports = function (S) {
         }
     }
 
-    // change Transaction object representation to "decoded" human readable format
+
+    /**
+    * change Transaction object representation to "decoded" human readable format
+    *
+    * :param testnet: (optional) flag for testnet network, by default is ``false``.
+    */
     Transaction.prototype.decode = function (testnet) {
         this.format = 'decoded';
         if (testnet !== undefined) this.testnet = testnet;
@@ -183,6 +200,9 @@ module.exports = function (S) {
         return this;
     };
 
+    /**
+    * change Transaction object representation to "raw" bytes format, all human readable part will be stripped.
+    */
     Transaction.prototype.encode = function () {
         if (iS(this.txId)) this.txId = s2rh(this.txId);
         if (iS(this.flag)) this.flag = s2rh(this.flag);
@@ -220,6 +240,13 @@ module.exports = function (S) {
         return this;
     };
 
+    /**
+    * get serialized Transaction
+    *
+    * :param segwit: (optional) flag for segwit representation of serialized transaction, by default ``true``.
+    * :param hex: (optional) if set to True return HEX encoded string, by default ``true``.
+    * :return str,bytes: serialized transaction in HEX or bytes.
+    */
     Transaction.prototype.serialize = function (A = {}) {
         ARGS(A, {segwit: true, hex: true});
         let chunks = [];
@@ -260,6 +287,9 @@ module.exports = function (S) {
         return (A.hex) ? out.hex() : out;
     };
 
+    /**
+    * get json Transaction representation
+    */
     Transaction.prototype.json = function () {
         let r;
         if (this.format === 'raw') {

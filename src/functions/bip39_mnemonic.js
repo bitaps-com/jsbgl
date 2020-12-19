@@ -176,6 +176,14 @@ module.exports = function (S) {
         }
     };
 
+    /**
+    * Generate 128-256 bits entropy bytes string
+    *
+    * :param strength: (optional) entropy bits strength, by default is 256 bit.
+    * :param hex: (optional) return HEX encoded string result flag, by default is ``true``.
+    * :param sec256k1Order: (optional) if ``true`` ECDSA_SEC256K1_ORDER, by default is ``true``.
+    * :return: HEX encoded or bytes entropy string.
+    */
     S.generateEntropy = (A = {}) => {
             ARGS(A, {strength: 256, hex: true, sec256k1Order:true});
             if (!([128, 160, 192, 224, 256].includes(A.strength)))
@@ -198,6 +206,15 @@ module.exports = function (S) {
             return A.hex ? b.hex() : b;
         };
 
+
+    /**
+    * Convert entropy to mnemonic words string.
+    *
+    * :parameters:
+    *   :e: random entropy HEX encoded or bytes string.
+    * :param wordList: (optional) word list, by default is BIP39_WORDLIST
+    * :return: mnemonic words string.
+    */
     S.entropyToMnemonic =  (e, A = {}) => {
         ARGS(A, {wordList: S.BIP39_WORDLIST, data: false});
         e = S.getBuffer(e);
@@ -220,6 +237,16 @@ module.exports = function (S) {
         return r.join(' ');
     };
 
+    /**
+    * Converting mnemonic words to entropy.
+    *
+    * :parameters:
+    *   m: mnemonic words string (space separated)
+    * :param wordList: (optional) word list, by default is BIP39_WORDLIST
+    * :param checkSum: (optional) boolean, by default is``false``.
+    * :param hex: (optional) return HEX encoded string result flag, by default is ``false``.
+    * :return: HEX encoded or bytes string.
+    */
     S.mnemonicToEntropy =  (m, A = {}) => {
         ARGS(A, {wordList: S.BIP39_WORDLIST, checkSum: false, hex: true});
         m = m.trim().split(/\s+/);
@@ -234,6 +261,16 @@ module.exports = function (S) {
     };
 
 
+    /**
+    * Converting mnemonic words string to seed for uses in key derivation (BIP-0032).
+    *
+    * :parameters:
+    *   :m: mnemonic words string (space separated)
+    * :param passphrase: (optional) passphrase to get ability use 2FA approach for creating seed, by default is empty string.
+    * :param checkSum: (optional) boolean, by default is ``false``.
+    * :param hex: (optional) return HEX encoded string result flag, by default is ``true``.
+    * :return: HEX encoded or bytes string.
+    */
     S.mnemonicToSeed =  (m, A = {}) => {
         ARGS(A, {passphrase: "", checkSum: false, hex: true});
         if (!S.isString(m)) throw new Error("mnemonic should be string");

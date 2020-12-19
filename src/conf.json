@@ -1,0 +1,5 @@
+{
+    "source": {
+        "include": ["../../src/", "../../src/classes", "../../src/functions"]
+    }
+}
