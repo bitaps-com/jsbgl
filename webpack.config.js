@@ -2,7 +2,7 @@ const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 const nodeEnv = process.env.NODE_ENV
 
-const jsbtc_web = {
+const jsbgl_web = {
     mode: "production",
     target: 'web',
     context: path.resolve(__dirname, "."),
@@ -12,8 +12,8 @@ const jsbtc_web = {
     entry: './src/jsbgl.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'jsbtc.js',
-        library: 'jsbtc',
+        filename: 'jsbgl.js',
+        library: 'jsbgl',
         libraryTarget: 'var',
     },
     optimization: {
@@ -36,5 +36,5 @@ const jsbtc_web = {
     performance: { hints: false }
 };
 
-module.exports = [jsbtc_web];
+module.exports = [jsbgl_web];
 

@@ -1,6 +1,6 @@
 var browser = true;
 try {
-    var jsbtc = require('../src/jsbgl.js');
+    var jsbgl = require('../src/jsbgl.js');
     var chai = require('chai');
     chai.use(require("chai-as-promised"));
     browser = false;
@@ -14,9 +14,9 @@ const assert = chai.assert;
 const expect = chai.expect;
 const equal = assert.equal;
 
-describe(`${(browser) ? 'Browser' : 'Node'} test jsbtc library`, function () {
+describe(`${(browser) ? 'Browser' : 'Node'} test jsbgl library`, function () {
     it('Asynchronous initialization', async () => {
-        await jsbtc.asyncInit(window);
+        await jsbgl.asyncInit(window);
     });
     describe("Hash functions:", function () {
         it('sha256', () => {
