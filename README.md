@@ -1,4 +1,4 @@
-<img src="docs/img/jsbtc.png" width="100">
+<img src="docs/img/jsbgl.png" width="100">
 
 ## JavaScript Bitgesell library
 
