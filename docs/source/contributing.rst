@@ -20,7 +20,7 @@ Workflow is pretty straightforward:
 
   3. Make sure all tests passed
 
-  4. Add a record intp file into ``change.log``.
+  4. Add a record into file into ``change.log``.
 
   5. Commit changes to own jsbgl clone
 
